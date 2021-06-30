@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Monster Slayer</title>
+    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="foundation.min.css">
+    <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+
+<body>
+    <div id="app">
+        <section class="row">
+            <div class="small-6 columns">
+                <transition :enter-active-class="'animate__animated' + ' animate__bounce'">
+                    <img src="https://i.pinimg.com/originals/0e/ba/9c/0eba9cc2a1cfc5b563b1b8546627330c.jpg" class="image" alt="" v-if='shakeP'>
+                </transition>
+                <h1 class="text-center">YOU</h1>
+                <div class="healthbar">
+                    <div class="healthbar text-center" v-bind:style="{width:playerHealth+'%'}" style="background-color: green; margin: 0; color: white;">
+                        {{playerHealth}}
+                    </div>
+                </div>
+            </div>
+            <div class="small-6 columns">
+                <transition enter-active-class="animate__animated animate__bounce">
+                    <img src="https://i.pinimg.com/originals/61/93/10/619310c9dc117e7395c6cd6570de3825.jpg " class="image " alt=" " v-if='shakeP'>
+                </transition>
+                <h1 class="text-center ">MONSTER</h1>
+                <div class="healthbar ">
+                    <div class="healthbar text-center " v-bind:style="{width:monsterhealth+ '%'} " style="background-color: green; margin: 0; color: white; ">
+                        {{monsterhealth}}
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="row controls " v-if="!gameIsRunning ">
+            <div class="small-12 columns ">
+                <button @click="startGame " id="start-game ">START NEW GAME</button>
+            </div>
+        </section>
+        <section class="row controls " v-else>
+            <div class="small-12 columns ">
+                <button id="attack " @click="attack ">ATTACK</button>
+                <button id="special-attack " @click="specialAttack ">SPECIAL ATTACK</button>
+                <button id="heal " @click="heal ">HEAL</button>
+                <button id="give-up " @click="giveUp ">GIVE UP</button>
+            </div>
+        </section>
+        <section class="row log ">
+            <div class="small-12 columns ">
+                <ul>
+                    <li v-for="turn in turns " :class="{ 'player-turn': turn.isPlayer, 'monster-turn': !turn.isPlayer} ">
+                        {{turn.text}}
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </div>
+    <style>
+        .fade-enter-active {
+            transition: opacity 0.5s;
+        }
+        
+        .fade-enter {
+            opacity: 0;
+        }
+        
+        .image {
+            position: relative;
+            width: 250px;
+            height: 310px;
+            padding: 6px 10px;
+            left: 100px;
+        }
+    </style>
+    <script>
+        new Vue({
+            el: "#app ",
+            data: {
+                playerHealth: 100,
+                monsterhealth: 100,
+                gameIsRunning: false,
+                turns: [],
+                shakeP: true,
+            },
+            methods: {
+                startGame: function() {
+                    this.gameIsRunning = true;
+                    this.playerHealth = 100;
+                    this.monsterhealth = 100;
+                    this.turns = [];
+                },
+                attack: function() {
+                    // var maximo = 10;
+                    // var minimo = 3;
+                    var damage = this.calculateDamage(3, 10);
+                    this.monsterhealth -= damage;
+                    this.turns.unshift({
+                        isPlayer: true,
+                        text: 'Player hits Monster for ' + damage,
+                    });
+                    this.animationP = "animate_bounce ";
+                    this.shakeP = !this.shakeP;
+
+                    if (this.monsterhealth <= 0) {
+                        this.monsterhealth = 0;
+                        alert('Ganhou');
+                        this.gameIsRunning = false
+                    };
+
+                    var damage = this.calculateDamage(3, 10);
+                    this.playerHealth -= damage;
+                    this.turns.unshift({
+                        isPlayer: false,
+                        text: 'Player hits Player for ' + damage,
+                    });
+                    if (this.playerHealth <= 0) {
+                        this.playerHealth = 0;
+                        alert('Perdeu');
+                        this.gameIsRunning = false
+                    }
+
+                },
+                specialAttack: function() {
+                    this.monsterhealth -= this.calculateDamage(3, 30);
+
+                    if (this.monsterhealth <= 0) {
+                        this.monsterhealth = 0;
+                        alert('Ganhou');
+                        this.gameIsRunning = false
+                    }
+
+                    this.playerHealth -= this.calculateDamage(3, 10);
+                    if (this.playerHealth <= 0) {
+                        this.playerHealth = 0;
+                        alert('Perdeu');
+                        this.gameIsRunning = false
+                    }
+                },
+                heal: function() {
+
+                },
+                giveUp: function() {
+                    alert('Nem pensar nisso');
+                    this.startGame = false;
+
+                },
+                calculateDamage(minimo, maximo) {
+                    return Math.max(Math.floor(Math.random() * maximo) + 1, minimo);
+                }
+            },
+            watch: {
+                shakeP: function(valor) {
+                    var dados = this;
+                    setTimeout(function() {
+                        dados.shakeP = true
+                    }, 1)
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
